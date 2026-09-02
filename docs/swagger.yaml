@@ -1,0 +1,89 @@
+basePath: /api/v1
+info:
+  contact: {}
+  description: A FizzBuzz REST API that returns the classic sequence for caller-supplied
+    divisors and words, and reports the most requested combination.
+  title: FizzBuzz API
+  version: "1.0"
+paths:
+  /fizzbuzz:
+    get:
+      description: 'Returns a fizzbuzz list from 1 to limit: multiples of int1 become
+        str1, multiples of int2 become str2, multiples of both become str1+str2.'
+      parameters:
+      - description: First divisor
+        in: query
+        maximum: 1000
+        minimum: 1
+        name: int1
+        required: true
+        type: integer
+      - description: Second divisor
+        in: query
+        maximum: 1000
+        minimum: 1
+        name: int2
+        required: true
+        type: integer
+      - description: Upper bound, inclusive
+        in: query
+        maximum: 1000
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - description: Replacement for int1 multiples
+        example: fizz
+        in: query
+        name: str1
+        required: true
+        type: string
+      - description: Replacement for int2 multiples
+        example: buzz
+        in: query
+        name: str2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: FizzBuzz
+      tags:
+      - fizzbuzz
+  /fizzbuzz/stats:
+    get:
+      description: 'Returns the most requested fizzbuzz parameters and how many times
+        they have been asked for. Responds with {"message": "no requests yet"} when
+        nothing has been recorded.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: FizzBuzz statistics
+      tags:
+      - fizzbuzz
+swagger: "2.0"

@@ -1,0 +1,49 @@
+services:
+  api:
+    build:
+      context: .
+      target: dev
+    env_file:
+      - .env
+    environment:
+      GOFLAGS: -buildvcs=false
+    volumes:
+      - .:/app
+      # Named volumes so the module and build caches survive `--force-recreate`.
+      # This is what makes every `make dev` after the first one start in seconds.
+      - go-mod:/go/pkg/mod
+      - go-build:/root/.cache/go-build
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      db:
+        # Not a bare `depends_on`: that only waits for the container to exist.
+        # Postgres accepts a TCP connection before it accepts queries, and the
+        # API exits on a failed connection, so without this gate the first
+        # `make dev` on a cold volume races the database and dies.
+        condition: service_healthy
+
+  db:
+    image: postgres:17.4-alpine
+    command: -p ${POSTGRES_PORT}
+    environment:
+      LC_ALL: C.UTF-8
+      TZ: ${API_TZ}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_PORT}"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+volumes:
+  db-data:
+  go-mod:
+  go-build:

@@ -1,0 +1,8 @@
+tmp
+.DS_Store
+bin/*
+api.log
+backup.sql
+.env
+coverage.out
+coverage.html
